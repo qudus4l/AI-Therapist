@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>AI Therapy Session</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      color: #2c3e50;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #34495e;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .status-indicator {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 15px;
+      background: white;
+      box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+      z-index: 100;
+      font-size: 0.9em;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    .error { 
+      background: #fff5f5; 
+      color: #c53030;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+
+    .conversation {
+      position: fixed;
+      bottom: 80px;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 80%;
+    }
+
+    .message.user {
+      background: #e8f4fd;
+      margin-left: auto;
+    }
+
+    .message.therapist {
+      background: #f0f9f4;
+      margin-right: auto;
+    }
+
+    #crisis-alert {
+      display: none;
+      background: #fed7d7;
+      color: #c53030;
+      padding: 15px;
+      border-radius: 8px;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .voice-visualizer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .voice-circle {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .circle-base {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        #ff6b6b,
+        #4ecdc4,
+        #45b7d1,
+        #96c93d
+      );
+      opacity: 0.2;
+      transition: transform 0.2s ease;
+    }
+
+    .circle-pulse {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(255, 107, 107, 0.5),
+        rgba(78, 205, 196, 0.5),
+        rgba(69, 183, 209, 0.5),
+        rgba(150, 201, 61, 0.5)
+      );
+      animation: pulse 2s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    .speaking .circle-base {
+      transform: scale(1.1);
+    }
+
+    .speaking .circle-pulse {
+      opacity: 0.3;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.3;
+      }
+      100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+      }
+    }
+
+    .voice-label {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Therapy Session</h1>
+    
+    <div class="controls">
+      <button id="start-button">Start Session</button>
+      <button id="end-button" style="display: none;">End Session</button>
+    </div>
+
+    <div id="crisis-alert"></div>
+    
+    <div class="voice-visualizer">
+      <div class="voice-circle">
+        <div class="circle-base"></div>
+        <div class="circle-pulse"></div>
+      </div>
+      <div class="voice-label">Listening...</div>
+    </div>
+
+    <div class="conversation" id="conversation">
+      <!-- Messages will be added here dynamically -->
+    </div>
+
+    <div class="status-indicator">
+      <p>Session Status: <span id="status">Waiting to begin</span></p>
+      <p>Microphone: <span id="mic-status">Not initialized</span></p>
+      <p>Voice Activity: <span id="audio-level">-</span></p>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const micStatusEl = document.getElementById('mic-status');
+    const audioLevelEl = document.getElementById('audio-level');
+    const startBtn = document.getElementById('start-button');
+    const endBtn = document.getElementById('end-button');
+    const crisisAlertEl = document.getElementById('crisis-alert');
+    const conversationEl = document.getElementById('conversation');
+
+    // Add new variables for voice visualization
+    const voiceCircle = document.querySelector('.voice-circle');
+    const voiceLabel = document.querySelector('.voice-label');
+    let isTherapistSpeaking = false;
+    let userSpeakingTimeout;
+
+    // Update audio level monitoring to control visualization
+    function setupAudioLevelMonitoring(stream) {
+      const audioContext = new AudioContext();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      microphone.connect(analyser);
+      
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      
+      function checkAudioLevel() {
+        analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+        audioLevelEl.textContent = Math.round(average);
+        
+        // Update voice visualization
+        if (average > 5 && !isTherapistSpeaking) {
+          voiceCircle.classList.add('speaking');
+          voiceLabel.textContent = 'Speaking...';
+          clearTimeout(userSpeakingTimeout);
+          userSpeakingTimeout = setTimeout(() => {
+            if (!isTherapistSpeaking) {
+              voiceCircle.classList.remove('speaking');
+              voiceLabel.textContent = 'Listening...';
+            }
+          }, 300);
+        }
+
+        if (average < 5) {
+          micStatusEl.style.color = 'red';
+          micStatusEl.textContent = 'No audio detected - check your microphone';
+        } else {
+          micStatusEl.style.color = 'green';
+          micStatusEl.textContent = 'Audio detected';
+        }
+        requestAnimationFrame(checkAudioLevel);
+      }
+      
+      checkAudioLevel();
+    }
+
+    // Update message handling to show therapist speaking state
+    function addMessage(text, role) {
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${role}`;
+      messageEl.textContent = text;
+      conversationEl.appendChild(messageEl);
+      conversationEl.scrollTop = conversationEl.scrollHeight;
+
+      if (role === 'therapist') {
+        isTherapistSpeaking = true;
+        voiceCircle.classList.add('speaking');
+        voiceLabel.textContent = 'Therapist speaking...';
+        // Simulate end of therapist speaking after message display
+        setTimeout(() => {
+          isTherapistSpeaking = false;
+          voiceCircle.classList.remove('speaking');
+          voiceLabel.textContent = 'Listening...';
+        }, 2000);
+      }
+    }
+
+    function handleCrisisDetection(crisisData) {
+      if (crisisData.crisis_level !== 'none') {
+        crisisAlertEl.style.display = 'block';
+        crisisAlertEl.textContent = `Crisis Alert: ${crisisData.reason}`;
+        if (crisisData.crisis_level === 'emergency') {
+          addMessage("I hear that you're in crisis. Please know that I'm an AI and cannot provide emergency services. Please contact emergency services or crisis hotline immediately at 988.", 'therapist');
+        }
+      } else {
+        crisisAlertEl.style.display = 'none';
+      }
+    }
+
+    async function initRealtimeConnection() {
+      try {
+        startBtn.style.display = 'none';
+        endBtn.style.display = 'inline-block';
+        statusEl.textContent = "Fetching ephemeral key...";
+        const tokenResponse = await fetch("/session");
+        if (!tokenResponse.ok) {
+          throw new Error("Failed to get ephemeral key from /session");
+        }
+        const tokenData = await tokenResponse.json();
+        const EPHEMERAL_KEY = tokenData.client_secret.value;
+
+        statusEl.textContent = "Setting up WebRTC PeerConnection...";
+        const pc = new RTCPeerConnection({
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+
+        // Setup audio element for model's response
+        const audioEl = document.createElement("audio");
+        audioEl.autoplay = true;
+        document.body.appendChild(audioEl);
+
+        pc.ontrack = (e) => {
+          console.log("Received remote track:", e);
+          audioEl.srcObject = e.streams[0];
+        };
+
+        // Add local microphone with error handling
+        try {
+          micStatusEl.textContent = "Requesting microphone access...";
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            } 
+          });
+          
+          micStatusEl.textContent = "Microphone connected";
+          setupAudioLevelMonitoring(stream);
+          
+          stream.getTracks().forEach(track => {
+            console.log("Adding local track:", track);
+            pc.addTrack(track, stream);
+          });
+        } catch (micError) {
+          console.error("Microphone error:", micError);
+          micStatusEl.textContent = `Microphone error: ${micError.message}`;
+          throw new Error(`Failed to access microphone: ${micError.message}`);
+        }
+
+        // Data channel setup with error handling
+        const dc = pc.createDataChannel("oai-events");
+        dc.onopen = () => {
+          console.log("Data channel is open");
+          statusEl.textContent = "Data channel opened";
+        };
+        dc.onerror = (error) => {
+          console.error("Data channel error:", error);
+          statusEl.textContent = `Data channel error: ${error.message}`;
+        };
+        dc.addEventListener("message", (e) => {
+          try {
+            const realtimeEvent = JSON.parse(e.data);
+            console.log("Received event:", realtimeEvent);
+            
+            // Handle different event types
+            if (realtimeEvent.type === 'response.done') {
+              const output = realtimeEvent.response.output[0];
+              if (output.type === 'function_call' && output.name === 'detect_crisis') {
+                handleCrisisDetection(JSON.parse(output.arguments));
+              } else if (output.type === 'text') {
+                addMessage(output.text, 'therapist');
+              }
+            }
+          } catch (err) {
+            console.warn("Received non-JSON data:", e.data);
+          }
+        });
+
+        // ICE connection monitoring
+        pc.oniceconnectionstatechange = () => {
+          console.log("ICE connection state:", pc.iceConnectionState);
+          statusEl.textContent = `ICE connection: ${pc.iceConnectionState}`;
+        };
+
+        // Create and set local description
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        statusEl.textContent = "Sending SDP offer to Realtime API...";
+        const baseUrl = "https://api.openai.com/v1/realtime";
+        const model = "gpt-4o-realtime-preview-2024-12-17";
+
+        const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
+          method: "POST",
+          body: offer.sdp,
+          headers: {
+            "Authorization": `Bearer ${EPHEMERAL_KEY}`,
+            "Content-Type": "application/sdp"
+          }
+        });
+
+        if (!sdpResponse.ok) {
+          throw new Error(`Realtime API SDP exchange failed: ${await sdpResponse.text()}`);
+        }
+
+        const answer = {
+          type: "answer",
+          sdp: await sdpResponse.text(),
+        };
+        await pc.setRemoteDescription(answer);
+
+        statusEl.textContent = "WebRTC connection established!";
+
+        // Send initial prompt
+        setTimeout(() => {
+          const initEvent = {
+            type: "response.create",
+            response: {
+              modalities: ["text", "speech"],
+              instructions: "Welcome to your therapy session. I'm here to listen and support you. How are you feeling today?",
+            },
+          };
+          dc.send(JSON.stringify(initEvent));
+          addMessage("Welcome to your therapy session. I'm here to listen and support you. How are you feeling today?", 'therapist');
+        }, 1000);
+
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Error: " + err.message;
+        micStatusEl.textContent = "Connection failed";
+      }
+    }
+
+    endBtn.addEventListener('click', () => {
+      // Add cleanup code here
+      startBtn.style.display = 'inline-block';
+      endBtn.style.display = 'none';
+      statusEl.textContent = 'Session ended';
+      addMessage("Thank you for sharing with me today. Take care of yourself.", 'therapist');
+    });
+
+    startBtn.addEventListener("click", initRealtimeConnection);
+  </script>
+</body>
+</html>
