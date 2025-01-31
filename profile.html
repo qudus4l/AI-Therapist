@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Profile - Mindful AI Therapy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-bg: #f5f7fa;
+      --secondary-bg: rgba(255, 255, 255, 0.95);
+      --accent-color: #8ba5c9;
+      --accent-glow: rgba(139, 165, 201, 0.2);
+      --text-primary: #2d3c4e;
+      --text-secondary: #64748b;
+      --error-color: #e17c7c;
+      --success-color: #9cbeb5;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.03);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.05);
+      --transition-default: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      --gradient-primary: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      --gradient-accent: linear-gradient(135deg, #8ba5c9 0%, #a3b8d9 100%);
+      --gradient-ambient: linear-gradient(135deg, rgba(139, 165, 201, 0.1) 0%, rgba(163, 184, 217, 0.1) 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      background: var(--gradient-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--gradient-ambient);
+      z-index: -1;
+      animation: ambientShift 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambientShift {
+      0% { opacity: 0.5; transform: scale(1); }
+      100% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+
+    .back-button {
+      background: var(--secondary-bg);
+      color: var(--text-primary);
+      border: none;
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition-default);
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .profile-sidebar {
+      background: var(--secondary-bg);
+      padding: 2rem;
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px);
+    }
+
+    .profile-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--gradient-ambient);
+      padding: 1.5rem;
+      border-radius: 16px;
+      transition: var(--transition-default);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .profile-content {
+      background: var(--secondary-bg);
+      padding: 2rem;
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .session-card {
+      background: var(--gradient-ambient);
+      padding: 1.5rem;
+      border-radius: 16px;
+      transition: var(--transition-default);
+    }
+
+    .session-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .session-date {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .session-duration {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .crisis-tag {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .crisis-none {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .crisis-low {
+      background: #9cbeb5;
+      color: white;
+    }
+
+    .crisis-medium {
+      background: #e9c46a;
+      color: white;
+    }
+
+    .crisis-high {
+      background: #f4a261;
+      color: white;
+    }
+
+    .crisis-emergency {
+      background: var(--error-color);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .profile-sidebar,
+      .profile-content {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/" class="logo">Mindful AI Therapy</a>
+      <a href="/" class="back-button">Return to Session</a>
+    </header>
+
+    <div class="profile-grid">
+      <div class="profile-sidebar">
+        <div class="profile-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="totalSessions">-</div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalMinutes">-</div>
+            <div class="stat-label">Minutes in Therapy</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="lastSession">-</div>
+            <div class="stat-label">Last Session</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-content">
+        <h2 class="section-title">Session History</h2>
+        <div class="session-list" id="sessionList">
+          <!-- Sessions will be added here dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const totalSessionsEl = document.getElementById('totalSessions');
+    const totalMinutesEl = document.getElementById('totalMinutes');
+    const lastSessionEl = document.getElementById('lastSession');
+    const sessionListEl = document.getElementById('sessionList');
+
+    async function fetchUserStats() {
+      try {
+        const response = await fetch('/user/sessions');
+        if (response.ok) {
+          const sessions = await response.json();
+          
+          // Update stats
+          totalSessionsEl.textContent = sessions.length;
+          
+          let totalMinutes = 0;
+          sessions.forEach(session => {
+            const start = new Date(session.started_at);
+            const end = new Date(session.ended_at);
+            const duration = (end - start) / (1000 * 60); // Convert to minutes
+            totalMinutes += duration;
+          });
+          
+          totalMinutesEl.textContent = Math.round(totalMinutes);
+          
+          if (sessions.length > 0) {
+            const lastSession = sessions[0];
+            const lastSessionDate = new Date(lastSession.ended_at);
+            lastSessionEl.textContent = lastSessionDate.toLocaleDateString();
+          }
+
+          // Render session list
+          sessionListEl.innerHTML = sessions.map(session => {
+            const start = new Date(session.started_at);
+            const end = new Date(session.ended_at);
+            const duration = Math.round((end - start) / (1000 * 60));
+            
+            const crisisEvents = JSON.parse(session.crisis_events);
+            const crisisTags = crisisEvents.map(event => 
+              `<span class="crisis-tag crisis-${event.crisis_level.toLowerCase()}">${event.crisis_level}</span>`
+            ).join('');
+
+            return `
+              <div class="session-card">
+                <div class="session-header">
+                  <div class="session-date">${start.toLocaleDateString()} ${start.toLocaleTimeString()}</div>
+                  <div class="session-duration">${duration} minutes</div>
+                </div>
+                <div class="session-crisis-tags">
+                  ${crisisTags || '<span class="crisis-tag crisis-none">No Crisis Events</span>'}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+      }
+    }
+
+    // Initial fetch
+    fetchUserStats();
+  </script>
+</body>
+</html> 

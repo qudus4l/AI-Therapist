@@ -336,6 +336,105 @@
       color: var(--text-primary);
     }
 
+    .profile-menu {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+    }
+
+    .profile-button {
+      background: var(--secondary-bg);
+      border: none;
+      padding: 0.8rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: var(--transition-default);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .profile-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gradient-accent);
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 0;
+      background: var(--secondary-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px);
+      min-width: 200px;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: var(--transition-default);
+    }
+
+    .profile-dropdown.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .profile-dropdown-item {
+      padding: 0.8rem 1rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition-default);
+    }
+
+    .profile-dropdown-item:hover {
+      background: var(--gradient-ambient);
+    }
+
+    .profile-dropdown-item:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .profile-dropdown-item:last-child {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .profile-dropdown-divider {
+      height: 1px;
+      background: rgba(139, 165, 201, 0.1);
+      margin: 0.5rem 0;
+    }
+
+    .session-stats {
+      padding: 0.8rem 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .session-stats-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
+
+    .session-stats-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -372,6 +471,35 @@
 </head>
 <body>
   <div class="container">
+    <div class="profile-menu">
+      <button class="profile-button" id="profileButton">
+        <div class="profile-icon"></div>
+      </button>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="session-stats">
+          <div class="session-stats-item">
+            <span>Total Sessions</span>
+            <span class="session-stats-value" id="totalSessions">-</span>
+          </div>
+          <div class="session-stats-item">
+            <span>Last Session</span>
+            <span class="session-stats-value" id="lastSession">-</span>
+          </div>
+        </div>
+        <div class="profile-dropdown-divider"></div>
+        <a href="/profile" class="profile-dropdown-item">
+          <span>View Profile</span>
+        </a>
+        <a href="/settings" class="profile-dropdown-item">
+          <span>Settings</span>
+        </a>
+        <div class="profile-dropdown-divider"></div>
+        <a href="#" class="profile-dropdown-item" id="logoutButton">
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+
     <h1>Welcome to Your Safe Space</h1>
     
     <div class="controls">
@@ -692,6 +820,62 @@
     });
 
     startBtn.addEventListener("click", initRealtimeConnection);
+
+    const profileButton = document.getElementById('profileButton');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const logoutButton = document.getElementById('logoutButton');
+    const totalSessionsEl = document.getElementById('totalSessions');
+    const lastSessionEl = document.getElementById('lastSession');
+
+    // Toggle profile dropdown
+    profileButton.addEventListener('click', () => {
+      profileDropdown.classList.toggle('active');
+      if (profileDropdown.classList.contains('active')) {
+        fetchUserStats();
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
+        profileDropdown.classList.remove('active');
+      }
+    });
+
+    // Handle logout
+    logoutButton.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const response = await fetch('/auth/logout');
+        if (response.ok) {
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    });
+
+    // Fetch user stats
+    async function fetchUserStats() {
+      try {
+        const response = await fetch('/user/sessions');
+        if (response.ok) {
+          const sessions = await response.json();
+          totalSessionsEl.textContent = sessions.length;
+          
+          if (sessions.length > 0) {
+            const lastSession = sessions[0];
+            const lastSessionDate = new Date(lastSession.ended_at);
+            lastSessionEl.textContent = lastSessionDate.toLocaleDateString();
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+      }
+    }
+
+    // Initial stats fetch
+    fetchUserStats();
   </script>
 </body>
 </html>

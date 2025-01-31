@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Sign Up - Mindful AI Therapy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-bg: #f5f7fa;
+      --secondary-bg: rgba(255, 255, 255, 0.95);
+      --accent-color: #8ba5c9;
+      --accent-glow: rgba(139, 165, 201, 0.2);
+      --text-primary: #2d3c4e;
+      --text-secondary: #64748b;
+      --error-color: #e17c7c;
+      --success-color: #9cbeb5;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.03);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.05);
+      --transition-default: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      --gradient-primary: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      --gradient-accent: linear-gradient(135deg, #8ba5c9 0%, #a3b8d9 100%);
+      --gradient-ambient: linear-gradient(135deg, rgba(139, 165, 201, 0.1) 0%, rgba(163, 184, 217, 0.1) 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      background: var(--gradient-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--gradient-ambient);
+      z-index: -1;
+      animation: ambientShift 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambientShift {
+      0% { opacity: 0.5; transform: scale(1); }
+      100% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards;
+    }
+
+    .auth-box {
+      width: 100%;
+      background: var(--secondary-bg);
+      padding: 2rem;
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      animation: fadeIn 1s ease-out 0.3s forwards;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .welcome-text {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid rgba(139, 165, 201, 0.2);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: var(--transition-default);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      background: white;
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    button {
+      width: 100%;
+      background: var(--gradient-accent);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-default);
+      margin-bottom: 1rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), 0 0 20px var(--accent-glow);
+    }
+
+    .auth-links {
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .auth-links a {
+      color: var(--accent-color);
+      text-decoration: none;
+      transition: var(--transition-default);
+    }
+
+    .auth-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .divider {
+      margin: 1.5rem 0;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(139, 165, 201, 0.2);
+    }
+
+    .divider span {
+      margin: 0 10px;
+    }
+
+    .social-login {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: white;
+      border: 1px solid rgba(139, 165, 201, 0.2);
+      padding: 0.8rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition-default);
+    }
+
+    .social-btn:hover {
+      background: var(--primary-bg);
+      transform: translateY(-2px);
+    }
+
+    .social-btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .auth-box {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="logo">Mindful AI Therapy</a>
+    
+    <div class="auth-box">
+      <h1>Begin Your Journey</h1>
+      
+      <p class="welcome-text">
+        Join our community of individuals seeking growth and emotional well-being. 
+        Your journey to better mental health starts here.
+      </p>
+      
+      <form id="signupForm" action="/auth/signup" method="POST">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email">
+          <div class="error-message" id="emailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Choose a secure password">
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+          <div class="error-message" id="confirmPasswordError"></div>
+        </div>
+
+        <button type="submit">Create Account</button>
+
+        <div class="divider">
+          <span>or sign up with</span>
+        </div>
+
+        <div class="social-login">
+          <button type="button" class="social-btn" onclick="signInWithGoogle()">
+            <img src="https://www.google.com/favicon.ico" alt="Google">
+            Google
+          </button>
+          <button type="button" class="social-btn" onclick="signInWithApple()">
+            <img src="https://www.apple.com/favicon.ico" alt="Apple">
+            Apple
+          </button>
+        </div>
+
+        <div class="auth-links">
+          Already have an account? <a href="/login">Sign in</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const signupForm = document.getElementById('signupForm');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Reset error messages
+      emailError.style.display = 'none';
+      passwordError.style.display = 'none';
+      confirmPasswordError.style.display = 'none';
+
+      const formData = new FormData(signupForm);
+      
+      // Validate passwords match
+      if (formData.get('password') !== formData.get('confirmPassword')) {
+        confirmPasswordError.textContent = 'Passwords do not match';
+        confirmPasswordError.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.get('email'),
+            password: formData.get('password'),
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Redirect to therapy session page
+          window.location.href = '/';
+        } else {
+          // Handle specific errors
+          if (data.errors) {
+            if (data.errors.email) {
+              emailError.textContent = data.errors.email;
+              emailError.style.display = 'block';
+            }
+            if (data.errors.password) {
+              passwordError.textContent = data.errors.password;
+              passwordError.style.display = 'block';
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+      }
+    });
+
+    function signInWithGoogle() {
+      // Implement Google Sign-In
+      window.location.href = '/auth/google';
+    }
+
+    function signInWithApple() {
+      // Implement Apple Sign-In
+      window.location.href = '/auth/apple';
+    }
+  </script>
+</body>
+</html> 
